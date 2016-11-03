@@ -244,6 +244,8 @@ You can also [tie specific resources to specific rules](https://bitbucket.org/sn
 - `dev` for interactive jobs
 - `owners`? when we get our machines
 
+Other queues including large memory queues [exist as well](http://sherlock.stanford.edu/mediawiki/index.php/Current_policies#Sherlock_Queue_Structure).
+
 ## a note on tmux
 
 A bit of strange behavior which I am trying to debug.
@@ -257,10 +259,13 @@ If you do want to use SLURM directly the documentation for submitting simple bas
 Some additional points:
 - you can specify which queue you want to run jobs on using the -p option to sbatch. The default is `normal`, there will be some name for our queue ('pritch'?), 'gpu' is probably self explanatory, and 'owners' allows you to submit jobs on other labs cluster allocation, with the caveat that your job will be cancelled (and later rescheduled) if that lab needs the compute. You can specify multiple queues! In which case SLURM will use the first available.
 - Two useful ways of running sets of jobs are array jobs and using the --export option. Using e.g. --array=1-10 as an option to sbatch will submit 10 jobs with an environment variable SLURM_ARRAY_TASK_ID set to corresponding job index. Alternatively you can call sbatch multiple times using e.g. --export=MYINDEX=1 etc, which will create an environment variable MYINDEX set to 1 for that job.
+- You can also modify the amount of memory with the argument `-m`.
 
 ## Interactive jobs
 
 Running `sdev` gets you an interactive job. Annoyingly the default run time for these is only an hour, and the max is 2h [use -t=2:00:00 to get this]. These instances also don't get much RAM (and no GPU).
+
+You can also run interactive jobs on other queues (see `sdev -h`)
 
 ## Storage
 
