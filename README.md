@@ -173,6 +173,18 @@ So if we want to execute things based on our metadata file, we can simply loaded
 
 Let's look at `example/Snakefile`.
 
+TODO: discuss `--dryrun -p`
+
+TODO: include a `run.sh` script
+
 ## submitting to a queue via snakemake
 
 TODO
+
+## checking status of jobs and logs
+
+## where do files live and where can you share things?
+
+## which queue should I submit to?
+
+## a note on tmux
