@@ -81,6 +81,18 @@ The following modules match your search criteria: "python"
   python: python/2.7.5, python/3.3.2
 ```
 
+### updating your $PATH
+
+If you are using any nonstandard Python software, make sure to include the `pip` (local) path into your main path.
+Put this into your `~/.bashrc` on the server:
+
+```
+export PATH=~/.local/bin:$PATH
+```
+
+This won't update automatically.
+Either logout/login or `source ~/.bashrc`
+
 ### installing snakemake
 
 snakemake is simply a python 3 package.
@@ -122,6 +134,10 @@ $ pip3 install --user snakemake
 [...]
 ```
 
+The `snakemake` binaries get loaded into `~/.local/bin` so in the future, you shouldn't have to load the python3 module.
+
+
+## TODO: fetch (SCP)
 
 ## submitting jobs
 
@@ -137,3 +153,26 @@ benefits:
 
 drawbacks:
 - some certain types of jobs don't lend themselves well to the snakemake framework
+
+## basic snakemake workflow
+
+Let's forget about Sherlock for a moment... Let's just think about processing workflows.
+
+Snakemake is a workflow system which unfortunately has the word `make` in it, often giving people a false impression it is as annoying as `GNU make`.
+
+- In a directory you have a `Snakefile` which has a bunch of rules
+- Every time you run `snakemake` it checks whether or not the top level dependencies have been met. If they haven't been met, it's then checks the dependencies of those dependencies and build a dependency graph automatically. The really awesome thing is that it knows what data is parallel and what isn't. It will automatically parallelize the processes that can be parallel without any thought on your end.
+
+### learning by example
+
+Let's say I want to call a script a specific number of times.
+I don't want to specify this in the Snakefile, I have some metadata file (`metadata/cool_metadata`) that tells me what arguments I want to use.
+
+While snakemake is a domain specific language, everything that it doesn't interpret as part of the language gets interpreted as standard Python 3.
+So if we want to execute things based on our metadata file, we can simply loaded using Python.
+
+Let's look at `example/Snakefile`.
+
+## submitting to a queue via snakemake
+
+TODO

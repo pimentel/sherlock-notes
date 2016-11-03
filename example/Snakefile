@@ -1,0 +1,52 @@
+BASE = '/Users/hjp/notes/sherlock-notes/example'
+# BASE = '/home/hjp/notes/sherlock-notes/example'
+
+# Here we are simply going to load a bunch of arguments from a file.
+# Since everything that isn't snakemake simply gets interpreted as python,
+# we can use standard python to load a file and populate a list.
+SCRIPT_ARGUMENTS = []
+with open(BASE + '/metadata/cool_metadata', 'r') as file_handle:
+    SCRIPT_ARGUMENTS = [line.strip() for line in file_handle]
+
+# there is no 'standard' rule 'all' like there is in GNU Make, however, by convention
+# we make the default rule 'all'.
+# the way we ensure that it is the first thing run is that it simply has all of the main inputs as dependencies
+rule all:
+    input:
+        # the function 'expand' is pretty beautiful...
+        # use it to get every single combination of wildcards
+        expand(BASE + '/results/magic_number_{i}_{j}', i = SCRIPT_ARGUMENTS,
+            j = SCRIPT_ARGUMENTS[0:len(SCRIPT_ARGUMENTS) - 1])
+
+rule generate_cool_output:
+    output:
+        BASE + '/results/cool_number_{i}'
+    shell:
+        'echo "A cool number is: {wildcards.i}"'
+        ' > {output}'
+
+def magic_number(x, y):
+    return x * y
+
+
+rule generate_magic_number:
+    input:
+        BASE + '/results/cool_number_{i}',
+        BASE + '/results/cool_number_{j}'
+    output:
+        BASE + '/results/magic_number_{i}_{j}'
+    run:
+        current_magic_number = magic_number(
+            int(wildcards['i']), int(wildcards['j']))
+        cmd = ''.join([
+        'echo "a very magical number is: ',
+        str(current_magic_number),
+        '" > {output}'
+        ])
+        shell(cmd)
+
+# this rule has no dependencies but we can simply run it by calling:
+# `snakemake clean`
+rule clean:
+    shell:
+        'rm -rf {BASE}/results'
