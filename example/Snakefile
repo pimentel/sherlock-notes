@@ -25,9 +25,9 @@ rule generate_cool_output:
         'echo "A cool number is: {wildcards.i}"'
         ' > {output}'
 
+# a helper function.
 def magic_number(x, y):
     return x * y
-
 
 rule generate_magic_number:
     input:
@@ -35,6 +35,8 @@ rule generate_magic_number:
         BASE + '/results/cool_number_{j}'
     output:
         BASE + '/results/magic_number_{i}_{j}'
+    threads: 1
+    # more complicated generation of commands can be dealt with the `run` directive.
     run:
         current_magic_number = magic_number(
             int(wildcards['i']), int(wildcards['j']))

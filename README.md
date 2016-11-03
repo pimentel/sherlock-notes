@@ -15,10 +15,12 @@ Port 22
 
 (replacing the `User`).
 
-Make sure to be connected to the 'Secure' network or be connected to the VPN.
-Once you are on the secure network, get a `Kerberos` token which should last a few hours (unless you restart your machine).
+Make sure to be connected to the 'Secure' network or the VPN.
+Get a `Kerberos` token which should last a few hours (unless you restart your machine).
 
 Now you can finally login with `ssh sherlock`.
+
+Note: if you want to log into the same machine because of temporary files (tmux) replace the HostName with a specific node (`sherlock-ln01.stanford.edu`).
 
 ## installing software
 
@@ -134,10 +136,20 @@ $ pip3 install --user snakemake
 [...]
 ```
 
-The `snakemake` binaries get loaded into `~/.local/bin` so in the future, you shouldn't have to load the python3 module.
+The `snakemake` binaries get loaded into `~/.local/bin`.
+Before you run snakemake, make sure to load the module otherwise you will get very strange errors.
+Consider putting it into your `~/.bashrc`.
 
+## fetch (SCP)
 
-## TODO: fetch (SCP)
+The configuration below seems to be all that I need when I am connected via ssh:
+
+- `Hostname`: sherlock
+- `Username`: my_username
+- `Connect using`: SFTP
+- `Password`: empty
+
+fetch and other SFTP clients have remote file edit capabilities which are pretty helpful sometimes.
 
 ## submitting jobs
 
@@ -150,6 +162,7 @@ benefits:
 - keeping track of what jobs have completed
 - automatically requesting the appropriate amount of CPU
 - unless you are doing a 1 off script, less boilerplate
+- reproducible workflows that can be shared
 
 drawbacks:
 - some certain types of jobs don't lend themselves well to the snakemake framework
@@ -161,7 +174,7 @@ Let's forget about Sherlock for a moment... Let's just think about processing wo
 Snakemake is a workflow system which unfortunately has the word `make` in it, often giving people a false impression it is as annoying as `GNU make`.
 
 - In a directory you have a `Snakefile` which has a bunch of rules
-- Every time you run `snakemake` it checks whether or not the top level dependencies have been met. If they haven't been met, it's then checks the dependencies of those dependencies and build a dependency graph automatically. The really awesome thing is that it knows what data is parallel and what isn't. It will automatically parallelize the processes that can be parallel without any thought on your end.
+- Every time you run `snakemake` it checks whether or not the top level dependencies have been met. If they haven't been met, it's then checks the dependencies of those dependencies and builds a dependency graph. The really awesome thing is that it knows what is data parallel and what isn't. It will automatically parallelize the processes that can be parallel without any thought on your end.
 
 ### learning by example
 
@@ -173,18 +186,67 @@ So if we want to execute things based on our metadata file, we can simply loaded
 
 Let's look at `example/Snakefile`.
 
-TODO: discuss `--dryrun -p`
-
-TODO: include a `run.sh` script
-
 ## submitting to a queue via snakemake
 
-TODO
+Once you have a Snakefile setup, it is simple to submit to a queue:
+
+```
+snakemake -p -j 999 --cluster "sbatch -p normal -n 5 -t 3:00:00"
+```
+
+This will make a request on the `normal` queue, with 5 tasks per node, with a maximum time of 3 hours.
+
+## general recommendations
+
+- always run snakemake with `-p` which will give you the commands it is going to run (not just the file output)
+- always perform a dry run with `-n` / `--dryrun`
+- if the project is large, have different directories with different Snakefiles
+- consider writing a `run.sh` script that simply has the snakemake command with some default resources
+- the cluster seems to behave strangely if you don't give it an absolute path
+  - I typically like to have a top level `config.py` file with a bunch of global paths/variables
 
 ## checking status of jobs and logs
 
-## where do files live and where can you share things?
+```
+squeue -u $USER
+```
+
+snakemake will generate standard out and error logs at `slurm_Y` where `Y` is the job id.
+
+## jobs that shouldn't be submitted to the queue but are part of your workflow
+
+are called `localrules`. Specify them as `localrules` near the top of your workflow:
+
+```
+localrules: my_local_rule, my_other_local_rule
+
+rule my_local_rule:
+  ...
+
+rule my_other_local_rule:
+  ...
+```
+
+## job specific resource request
+
+You can tie specific queue requests to a rule with a [cluster configuration](https://bitbucket.org/snakemake/snakemake/wiki/Documentation#markdown-header-cluster-configuration).
+
+You can also [tie specific resources to specific rules](https://bitbucket.org/snakemake/snakemake/wiki/Documentation#markdown-header-resources) (e.g. number of gpus).
+
+## where do lab specific files live?
+
+```
+/scratch/PI/pritch
+```
 
 ## which queue should I submit to?
 
+- `normal` for jobs that take more than a few hours/more than basic resources you might have on your machine
+- `dev` for interactive jobs
+- `owners`? when we get our machines
+
 ## a note on tmux
+
+A bit of strange behavior which I am trying to debug.
+- Make sure to login to the same node
+- One of the admin suggested `unset TMPDIR` before running `tmux` (I'm still having weird issues)
