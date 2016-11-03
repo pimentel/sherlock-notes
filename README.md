@@ -129,7 +129,7 @@ Load the python module:
 
 ```
 $ module load python/3.3.2
-```
+````
 
 ```
 $ pip3 install --user snakemake
@@ -151,10 +151,9 @@ The configuration below seems to be all that I need when I am connected via ssh:
 
 fetch and other SFTP clients have remote file edit capabilities which are pretty helpful sometimes.
 
-## submitting jobs
+## snakemake vs using SLURM directly
 
 The queuing system used is SLURM.
-The documentation for submitting simple bash scripts is pretty good and can be found [here](http://sherlock.stanford.edu/mediawiki/index.php/SLURMSubmit).
 
 ...but I would say, don't toy around with that -- just use snakemake for everything!
 
@@ -250,3 +249,35 @@ You can also [tie specific resources to specific rules](https://bitbucket.org/sn
 A bit of strange behavior which I am trying to debug.
 - Make sure to login to the same node
 - One of the admin suggested `unset TMPDIR` before running `tmux` (I'm still having weird issues)
+
+## submitting jobs
+
+If you do want to use SLURM directly the documentation for submitting simple bash scripts is pretty good and can be found [here](http://sherlock.stanford.edu/mediawiki/index.php/SLURMSubmit).
+
+Some additional points:
+- you can specify which queue you want to run jobs on using the -p option to sbatch. The default is `normal`, there will be some name for our queue ('pritch'?), 'gpu' is probably self explanatory, and 'owners' allows you to submit jobs on other labs cluster allocation, with the caveat that your job will be cancelled (and later rescheduled) if that lab needs the compute. You can specify multiple queues! In which case SLURM will use the first available.
+- Two useful ways of running sets of jobs are array jobs and using the --export option. Using e.g. --array=1-10 as an option to sbatch will submit 10 jobs with an environment variable SLURM_ARRAY_TASK_ID set to corresponding job index. Alternatively you can call sbatch multiple times using e.g. --export=MYINDEX=1 etc, which will create an environment variable MYINDEX set to 1 for that job.
+
+## Interactive jobs
+
+Running `sdev` gets you an interactive job. Annoyingly the default run time for these is only an hour, and the max is 2h [use -t=2:00:00 to get this]. These instances also don't get much RAM (and no GPU).
+
+## Storage
+
+The storage options are very well documented here:
+http://sherlock.stanford.edu/mediawiki/index.php/DataStorage
+
+## Using the GPU
+
+Sherlock is very well set up for using their/our GPU machines.
+
+To have stuff setup for theano I have the following in my `.bash_profile`:
+
+```
+ml load cuDNN/v4
+ml load theano
+ml load openblas/0.2.15
+alias sgpu="srun -p gpu,owners --qos gpu --gres gpu:1 --pty bash"
+```
+
+The last line creates an alias to request an iteractive GPU job. Note these don't tend to get scheduled until you leave the lab :/
