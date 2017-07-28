@@ -30,10 +30,10 @@ http://sherlock.stanford.edu/mediawiki/index.php/Software
 
 ### the skinny on software
 
-- `module available` to get a list of all the software that is installed
-- `module load SOFTWARE_NAME` to load the package `SOFTWARE_NAME`
-- `module spider SEARCH_TERM` to search for a specific package or load more information about a specific package
-- `module keyword KEYWORD` to do a more permissive search amongst packages for `KEYWORD`
+- `module available` to get a list of all the software that is installed.
+- `module load SOFTWARE_NAME` to load the package `SOFTWARE_NAME`.
+- `module spider SEARCH_TERM` to search for a specific package or load more information about a specific package.
+- `module keyword KEYWORD` to do a more permissive search amongst packages for `KEYWORD`.
 
 Example:
 
@@ -158,13 +158,14 @@ The queuing system used is SLURM.
 ...but I would say, don't toy around with that -- just use snakemake for everything!
 
 benefits:
-- keeping track of what jobs have completed
-- automatically requesting the appropriate amount of CPU
-- unless you are doing a 1 off script, less boilerplate
-- reproducible workflows that can be shared
+- keeping track of what jobs have completed.
+- automatically requesting the appropriate amount of CPU.
+- unless you are doing a 1 off script, less boilerplate.
+- reproducible workflows that can be shared.
 
 drawbacks:
-- some certain types of jobs don't lend themselves well to the snakemake framework
+- some certain types of jobs don't lend themselves well to the snakemake framework.
+- some flexibility is lost in specifying resources.
 
 ## basic snakemake workflow
 
@@ -172,7 +173,7 @@ Let's forget about Sherlock for a moment... Let's just think about processing wo
 
 Snakemake is a workflow system which unfortunately has the word `make` in it, often giving people a false impression it is as annoying as `GNU make`.
 
-- In a directory you have a `Snakefile` which has a bunch of rules
+- In a directory you have a `Snakefile` which has a bunch of rules.
 - Every time you run `snakemake` it checks whether or not the top level dependencies have been met. If they haven't been met, it's then checks the dependencies of those dependencies and builds a dependency graph. The really awesome thing is that it knows what is data parallel and what isn't. It will automatically parallelize the processes that can be parallel without any thought on your end.
 
 ### learning by example
@@ -197,12 +198,12 @@ This will make a request on the `normal` queue, with 5 tasks per node, with a ma
 
 ## general recommendations
 
-- always run snakemake with `-p` which will give you the commands it is going to run (not just the file output)
-- always perform a dry run with `-n` / `--dryrun`
+- always run snakemake with `-p` which will give you the commands it is going to run (not just the file output).
+- always perform a dry run with `-n` / `--dryrun` (`snakemake -p --dryrun`).
 - if the project is large, have different directories with different Snakefiles
-- consider writing a `run.sh` script that simply has the snakemake command with some default resources
-- the cluster seems to behave strangely if you don't give it an absolute path
-  - I typically like to have a top level `config.py` file with a bunch of global paths/variables
+- consider writing a `run.sh` script that simply has the snakemake command with some default resources.
+- the cluster seems to behave strangely if you don't give it an absolute path.
+  - I typically like to have a top level `config.py` file with a bunch of global paths/variables.
 
 ## checking status of jobs and logs
 
@@ -286,3 +287,29 @@ alias sgpu="srun -p gpu,owners --qos gpu --gres gpu:1 --pty bash"
 ```
 
 The last line creates an alias to request an iteractive GPU job. Note these don't tend to get scheduled until you leave the lab :/
+
+# Sherlock 2
+
+Login nodes on sherlock 2:
+
+- sh-ln01.stanford.edu
+- sh-ln02.stanford.edu
+
+## tmux
+
+tmux seems better behaved on sherlock for whatever reason.
+It works by doing the following:
+
+- add the following line to your `.bashrc`: `unset TMPDIR`.
+- Logging into the same node consistently.
+
+Here's an example of my `~/.ssh/config` that allows me to simply type `ssh sherlock2`:
+
+```
+Host sherlock2
+GSSAPIDelegateCredentials yes
+GSSAPIAuthentication yes
+HostName sh-ln01.stanford.edu
+User hjp
+Port 22
+```
