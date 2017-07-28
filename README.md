@@ -241,9 +241,10 @@ You can also [tie specific resources to specific rules](https://bitbucket.org/sn
 
 ## which queue should I submit to?
 
+- `pritch` for most things since we now have our own machines
+- `owners` for machines that are idle that other people own
 - `normal` for jobs that take more than a few hours/more than basic resources you might have on your machine
 - `dev` for interactive jobs
-- `owners`? when we get our machines
 
 Other queues including large memory queues [exist as well](http://sherlock.stanford.edu/mediawiki/index.php/Current_policies#Sherlock_Queue_Structure).
 
